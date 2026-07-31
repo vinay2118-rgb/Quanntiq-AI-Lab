@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 from typing import Literal
 
 import pytest
@@ -55,6 +55,21 @@ def test_explicit_values_override_environment(
     assert settings.port == 9092
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("port", 0),
+        ("port", 65_536),
+        ("environment", "invalid"),
+        ("log_level", "TRACE"),
+        ("database_url", "not-a-postgres-url"),
+    ],
+)
+def test_settings_reject_invalid_values(field: str, value: object) -> None:
+    with pytest.raises(ValidationError):
+        Settings.model_validate({field: value})
+
+
 @pytest.mark.parametrize("environment", ["staging", "production"])
 def test_settings_reject_placeholder_database_credentials(
     environment: Literal["staging", "production"],
@@ -62,7 +77,5 @@ def test_settings_reject_placeholder_database_credentials(
     with pytest.raises(ValidationError):
         Settings(
             environment=environment,
-            database_url=PostgresDsn(
-                "postgresql+asyncpg://qal:change-me@localhost:5432/qal"
-            ),
+            database_url=PostgresDsn("postgresql+asyncpg://qal:change-me@localhost:5432/qal"),
         )
