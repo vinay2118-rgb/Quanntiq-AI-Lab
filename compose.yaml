@@ -4,8 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file: .env
-    environment:
-      QAL_DATABASE_URL: postgresql+asyncpg://qal:change-me@postgres:5432/qal
     ports:
       - "8080:8080"
     depends_on:
