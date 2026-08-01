@@ -23,3 +23,7 @@ class InvalidDependencyError(KernelError):
 
 class InvalidLifecycleTransitionError(KernelError):
     """Raised when a lifecycle transition violates the state machine."""
+
+
+class InvalidEventTopicError(KernelError):
+    """Raised when an event topic violates the required routing format."""
