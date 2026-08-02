@@ -58,3 +58,6 @@ class InvalidEntryPointError(PackageValidationError):
 
 class PackageLoadError(KernelError):
     """Raised when a validated package entry point cannot be loaded."""
+
+class PackageNotFoundError(KernelError):
+    """Raised when a requested package is not registered."""
