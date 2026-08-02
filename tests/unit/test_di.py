@@ -42,19 +42,20 @@ def test_container_detects_circular_dependencies() -> None:
     class ServiceB:
         pass
 
+    def create_service_a(container: Container) -> ServiceA:
+        container.resolve(ServiceB)
+        return ServiceA()
+
+    def create_service_b(container: Container) -> ServiceB:
+        container.resolve(ServiceA)
+        return ServiceB()
+
     container = Container()
-    container.register_factory(
-        ServiceA,
-        lambda dependencies: dependencies.resolve(ServiceB),
-    )
-    container.register_factory(
-        ServiceB,
-        lambda dependencies: dependencies.resolve(ServiceA),
-    )
+    container.register_factory(ServiceA, create_service_a)
+    container.register_factory(ServiceB, create_service_b)
 
     with pytest.raises(CircularDependencyError):
         container.resolve(ServiceA)
-
 
 def test_container_rejects_incompatible_factory_result() -> None:
     container = Container()
