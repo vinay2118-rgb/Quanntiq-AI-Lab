@@ -39,12 +39,30 @@ def test_validator_accepts_valid_manifest() -> None:
 
 
 @pytest.mark.parametrize(
-    "field_name",
-    ("name", "category", "description", "author"),
+    "manifest",
+    (
+        pytest.param(
+            replace(_VALID_MANIFEST, name="   "),
+            id="blank-name",
+        ),
+        pytest.param(
+            replace(_VALID_MANIFEST, category="   "),
+            id="blank-category",
+        ),
+        pytest.param(
+            replace(_VALID_MANIFEST, description="   "),
+            id="blank-description",
+        ),
+        pytest.param(
+            replace(_VALID_MANIFEST, author="   "),
+            id="blank-author",
+        ),
+    ),
 )
-def test_validator_rejects_blank_required_fields(field_name: str) -> None:
+def test_validator_rejects_blank_required_fields(
+    manifest: PackageManifest,
+) -> None:
     validator = PackageValidator(platform_version="1.2.0")
-    manifest = replace(_VALID_MANIFEST, **{field_name: "   "})
 
     with pytest.raises(InvalidManifestError):
         validator.validate(
@@ -69,19 +87,29 @@ def test_validator_rejects_invalid_package_id(package_id: str) -> None:
 
 
 @pytest.mark.parametrize(
-    ("field_name", "version"),
+    "manifest",
     (
-        ("version", "1.2"),
-        ("version", "v1.2.3"),
-        ("minimum_platform_version", "latest"),
+        pytest.param(
+            replace(_VALID_MANIFEST, version="1.2"),
+            id="short-package-version",
+        ),
+        pytest.param(
+            replace(_VALID_MANIFEST, version="v1.2.3"),
+            id="prefixed-package-version",
+        ),
+        pytest.param(
+            replace(
+                _VALID_MANIFEST,
+                minimum_platform_version="latest",
+            ),
+            id="invalid-minimum-platform-version",
+        ),
     ),
 )
 def test_validator_rejects_invalid_semantic_versions(
-    field_name: str,
-    version: str,
+    manifest: PackageManifest,
 ) -> None:
     validator = PackageValidator(platform_version="1.2.0")
-    manifest = replace(_VALID_MANIFEST, **{field_name: version})
 
     with pytest.raises(InvalidVersionError):
         validator.validate(

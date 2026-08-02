@@ -55,3 +55,6 @@ class MissingDependencyError(PackageValidationError):
 
 class InvalidEntryPointError(PackageValidationError):
     """Raised when a package entry point is invalid."""
+
+class PackageLoadError(KernelError):
+    """Raised when a validated package entry point cannot be loaded."""
