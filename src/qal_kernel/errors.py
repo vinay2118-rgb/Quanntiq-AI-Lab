@@ -27,3 +27,37 @@ class InvalidLifecycleTransitionError(KernelError):
 
 class InvalidEventTopicError(KernelError):
     """Raised when an event topic violates the required routing format."""
+
+
+class PackageValidationError(KernelError):
+    """Base exception for package-validation failures."""
+
+
+class InvalidManifestError(PackageValidationError):
+    """Raised when a package manifest is incomplete or invalid."""
+
+
+class InvalidPackageIdError(PackageValidationError):
+    """Raised when a package identifier violates the required format."""
+
+
+class InvalidVersionError(PackageValidationError):
+    """Raised when a package or platform version is invalid."""
+
+
+class UnsupportedPlatformError(PackageValidationError):
+    """Raised when the platform version cannot support a package."""
+
+
+class MissingDependencyError(PackageValidationError):
+    """Raised when a required package dependency is unavailable."""
+
+
+class InvalidEntryPointError(PackageValidationError):
+    """Raised when a package entry point is invalid."""
+
+class PackageLoadError(KernelError):
+    """Raised when a validated package entry point cannot be loaded."""
+
+class PackageNotFoundError(KernelError):
+    """Raised when a requested package is not registered."""
