@@ -1,5 +1,6 @@
 """Service contracts and registry."""
 
+import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
@@ -25,17 +26,29 @@ class ServiceRegistry:
 
     def register(self, service: ServiceDescriptor) -> None:
         if service.name in self._services:
-            raise DuplicateRegistrationError(f"Service already registered: {service.name}")
+            raise DuplicateRegistrationError(
+                f"Service already registered: {service.name}"
+            )
         self._services[service.name] = service
 
     def names(self) -> tuple[str, ...]:
         return tuple(sorted(self._services))
 
     async def readiness(self) -> dict[str, bool]:
-        results: dict[str, bool] = {}
-        for name, descriptor in self._services.items():
-            try:
-                results[name] = await descriptor.health_check()
-            except Exception:
-                results[name] = False
-        return results
+        snapshot = tuple(sorted(self._services.items()))
+
+        results = await asyncio.gather(
+            *(self._probe(descriptor) for _, descriptor in snapshot)
+        )
+
+        return {
+            name: result
+            for (name, _), result in zip(snapshot, results, strict=True)
+        }
+
+    @staticmethod
+    async def _probe(descriptor: ServiceDescriptor) -> bool:
+        try:
+            return await descriptor.health_check()
+        except Exception:
+            return False
